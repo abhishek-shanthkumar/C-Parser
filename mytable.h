@@ -2,15 +2,9 @@
 
 struct symtab {
     char *name;
-    int value;
+    char *value;
     char *type;
+    int is_function;
 } symtab[NSYMS];
-
-/*   struct exval {
-    int istemp;
-    char* tempval; 
-    char * value;
-} test[1];
-*/
 
 struct symtab *symlook();

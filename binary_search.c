@@ -1,9 +1,9 @@
 int main()
 {
-   int c, first, last, middle, n, search, array[100];
+   int c, first, last, middle, n, search, array;
  
    printf("Enter number of elements\n");
-   scanf("%d",&n);
+   scanf("%d",n);
  
    printf("Enter %d integers\n", n);
  

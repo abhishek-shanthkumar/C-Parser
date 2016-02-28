@@ -11,28 +11,6 @@ int yylex(void);
 int yylineno;
 extern FILE *yyin;
 extern FILE *fopen(const char *filename, const char *mode);
-char *target, source;
-static int tempnum;
-
-char *newtemp();
-
-int istemp(char *c);
-
-void removetemp();
-void emitln(char *s);
-void emit(char *s);
-static int label = 0;
-
-char *openlabel();
-char *closelabelmin();
-char *closelabel();
-
-char *stack [100]; 
-static int top = 0;
-char *stack_pop();
-char *stack_get_top_element() ;
-void stack_push(char *c);
-static int stack_get_top();
 
 char *current_type;
 void print_symbol_table();
@@ -73,7 +51,7 @@ program
     ;
 
 funcdef
-    : types ID args block_statement                                 { $2->type = strdup($1); }
+    : types ID args block_statement                                 { $2->type = strdup($1); $2->is_function = 1; }
     ;
 
 args
@@ -166,12 +144,12 @@ ret_statement
     ;
 
 expression
-    : NUMBER { $$ = $1; }
-    | ID { $$ = $1 -> name ;}
-    | expression PLUS expression { $$ = $1; }
-    | expression MINUS expression { $$ = $1; }
-    | expression ASTERISK expression { $$ = $1; }
-    | expression SLASH expression { $$ = $1; }
+    : NUMBER
+    | ID { $$ = $1->value; }
+    | expression PLUS expression
+    | expression MINUS expression
+    | expression ASTERISK expression
+    | expression SLASH expression
     | PAR_OPEN expression PAR_CLOSE { $$ = $2; }
     ;
 
@@ -187,7 +165,7 @@ expression_list
 
 %%
 
-struct symtab * symlook(char *s)
+struct symtab *symlook(char *s)
 {
     char *p;
     struct symtab *sp;
@@ -201,106 +179,27 @@ struct symtab * symlook(char *s)
         }
 
     }
-    yyerror("too many symbols ");
+    yyerror("Too many symbols");
     exit(1);
 } 
 
-/*char * openlabel (){
-    label = label + 1;
-
-    char integer_string[4] = "";
-
-    sprintf(integer_string, "%d", label);
-    char * temp ;
-    temp = strdup("L");
-    return  strcat(temp, integer_string); 
-
-}
-
-char * closelabelmin() {
-    label = label -1 ;
-    char integer_string[4] = "";
-
-    sprintf(integer_string, "%d", label);
-    char * temp ;
-    temp = strdup("L");
-    return  strcat(temp, integer_string); 
-}
-
-char * closelabel() {
-
-    char integer_string[4] = "";
-
-    sprintf(integer_string, "%d", label);
-    char * temp ;
-    temp = strdup("L");
-    return  strcat(temp, integer_string); 
-}*/
-
-void removetemp(int n) {
-    tempnum = tempnum - n;
-}
-
-
-void emitln(char *s) {
-    printf("%s\n", s );
-}
-
-void emit(char *s) {
-    printf("%s", s );
-}
-
-/*char * newtemp(){
-    tempnum = tempnum + 1;
-
-    char integer_string[4] = "";
-
-    sprintf(integer_string, "%d", tempnum);
-    char * temp ;
-    temp = strdup("T");
-    return  strcat(temp, integer_string); 
-}
-
-int istemp(char *s){
-    char *temp = "T";
-    if(s[0] == temp[0]){
-        return 1;
-    }
-
-    else{
-        return 0;
-    }
-}
-
-void stack_push(char * c){
-    stack[top++] = c;
-}
-
-char * stack_pop(){
-    return stack[--top];
-}
-
-static int stack_get_top(){
-    return top;
-}
-
-char * stack_get_top_element(){
-    return stack[top - 1];
-}*/
-
 int yyerror(char *s) {
-    fprintf(stderr , "%s line %i \n", s, yylineno);
+    fprintf(stderr , "%s on line %i.\n", s, yylineno);
     exit(0);
 }
 
 void print_symbol_table() {
     char *p;
     struct symtab *sp;
+    printf("\n----- SYMBOL TABLE -----\n\n");
+    printf("Identifier\tType\t\tFunction?\n");
+    printf("----------\t----\t\t---------\n");
     for(sp = symtab ; sp < &symtab[NSYMS] ; sp++) {
         if(!sp->name)
             break;
-        printf("%s\t%s\n", sp->name, sp->type);
+        printf("%s\t\t%s\t\t%s\n", sp->name, sp->type, sp->is_function ? "Yes" : "" );
     }
+    printf("\n----- END OF SYMBOL TABLE -----\n\n");
 }
 
 int main(int argc ,char *argv[]) {
@@ -308,7 +207,7 @@ int main(int argc ,char *argv[]) {
 
     yyparse();
     
-    printf("Program parsed successfully.\n");
+    printf("\nProgram parsed successfully.\n");
     print_symbol_table();
 
     fclose(yyin);
