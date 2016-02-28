@@ -10,7 +10,7 @@ WS  [ \t\v\n\f]
 #include <stdio.h>
 #include <stdlib.h>
 #include "y.tab.h"
-#include "mytable.h"
+#include "symbol_table.h"
 
 extern void yyerror(const char *);
 static void comment(void);

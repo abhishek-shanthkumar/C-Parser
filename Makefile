@@ -9,10 +9,10 @@ compiler: lex.yy.o y.tab.o
 lex.yy.o: lex.yy.c y.tab.h
 y.tab.o: y.tab.c
 
-y.tab.c y.tab.h: c_simple_parser_new.y mytable.h
-	$(YACC) c_simple_parser_new.y
+y.tab.c y.tab.h: c_simple_parser.y symbol_table.h
+	$(YACC) c_simple_parser.y
 
-lex.yy.c: c_simple_lexer.l mytable.h
+lex.yy.c: c_simple_lexer.l symbol_table.h
 	$(LEX) c_simple_lexer.l
 
 clean:
